@@ -112,62 +112,10 @@ def generatePixel(mu, sigma, L, LEFT = False):
 
 	return ((x,y), L)
 
-def getPolygon(A_angle, C_angle, size):
-
-	C_angle = 3*np.pi/5 - 0.039751849258575
-	l = size/(1-cos(A_angle))
-	xa = -l*cos(A_angle)
-	ya = 0
-	A = (xa, ya)
-	B = (xa + l*cos(A_angle), ya + l*sin(A_angle))
-	C = (xa, ya + 2*l*sin(A_angle))
-	D = (xa + l*cos(C_angle-A_angle), ya + 2*l*sin(A_angle) + l*sin(C_angle-A_angle))
-	E = (xa + l, ya)
-
-	poly = [A, B, C, D, E]
-
-	for i in range(len(poly)):
-		(t, t2) = poly[i]
-		poly[i] = (t, abs(t2 - size))
-
-	return poly
-
-
-def saveAsPolygon(image, name, length):
-
-	# read image as RGB and add alpha (transparency)
-	im = image.convert("RGBA")
-
-	# convert to numpy (for convenience)
-	imArray = np.asarray(im)
-
-	# create mask
-	poly = getPolygon(3*np.pi/4, 3*np.pi/5, length)
-	maskIm = Image.new('L', (imArray.shape[1], imArray.shape[0]), 0)
-	ImageDraw.Draw(maskIm).polygon(poly, outline=1, fill=1)
-	mask = np.array(maskIm)
-
-	# assemble new image (uint8: 0-255)
-	newImArray = np.empty(imArray.shape,dtype='uint8')
-
-	# colors (three first columns, RGB)
-	newImArray[:,:,:3] = imArray[:,:,:3]
-
-	# transparency (4th column)
-	newImArray[:,:,3] = mask*255
-
-	# we compute symetry in order to don't have to flip them after
-	if (int(name[name.rfind('/')+1:]) % 24) % 2 == 0:
-		newImArray = np.fliplr(newImArray)
-
-	# back to Image from numpy
-	newIm = Image.fromarray(newImArray, "RGBA")
-	newIm.save(name + ".png")
-
 
 def fromFolder(FOLDER, TEMP, N = 1000, EPOCHS = 50, transitionWidth = 100, name="test", wayAndReturn = True, length=300):
 
-	sigma = 50
+	sigma = 0
 
 	files = []
 	for file in glob.glob(FOLDER+"/*") :
