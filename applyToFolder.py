@@ -47,9 +47,11 @@ def main(mypath, name, length=300):
 
 	folders = [f for f in listdir(SUB) if not isfile(join(SUB, f))]
 
+	k = 0
 	for folder in folders:
 		print(folder)
-		horizontalTransition.fromFolder(SUB + folder, OUT + 'temp',  name = "OUT/"+ str(folder), length=300)
+		horizontalTransition.fromFolder(SUB + folder, OUT + 'temp',  name = "OUT/"+ str(folder), length=300, seed=k)
+		k += 1
 
 
 if __name__ == "__main__":

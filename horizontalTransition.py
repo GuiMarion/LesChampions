@@ -7,7 +7,81 @@ import random
 from tqdm import tqdm
 from math import *
 from PIL import ImageDraw
+import matplotlib.pyplot as plt
 
+def getSigma(x):
+	#return np.sin(0.005*x + 300)*8 + 8
+	if x > 4150:
+		return np.sin(0.003*x + 294)*8 + 8
+	else: 
+		return 0
+
+def plotSigma(save=""):
+	X = np.arange(5820)
+	Y = []
+	for i in range(len(X)):
+		Y.append(getSigma(i))
+
+	plt.plot(X/30, Y)
+	plt.xlabel("Temps en secondes")
+	plt.ylabel("Valeur de Sigma")
+	
+	if save != "":
+		plt.savefig(save)
+
+	plt.show()
+
+
+def getEpochs(x):
+	if x < 2*405:
+		return 2*180
+	else:
+		return 2*np.sin(0.0028*x + 802.35)*35 + 8 + 195
+
+def plotEpochs(save=""):
+	X = np.arange(5820)
+	Y = []
+	for i in range(len(X)):
+		Y.append(getEpochs(i))
+
+	plt.plot(X/30, Y)
+	plt.xlabel("Temps en secondes")
+	plt.ylabel("Lenteur")
+	
+	if save != "":
+		plt.savefig(save)
+
+	plt.show()
+
+def getmuPause(x):
+	if x < 500:
+		mu = (0.33 - (0.001*x**3)/(0.001*5820**3)*300)*1000
+		return 120
+	elif x >= 500 :
+		return np.sin(0.005*x + 801.8)*15  + 120
+
+def getPpause(x):
+	if x < 2*500:
+		mu = getmuPause(x)
+		sigma = mu*0.1
+		return 2*int(np.random.normal(mu, sigma, 1)[0])
+	elif x >= 2*500 :
+		mu = getmuPause(x)
+		sigma = mu*0.35
+		return 2*int(np.random.normal(mu, sigma, 1)[0])
+
+def plotPause(save=""):
+	X = np.arange(5820)
+	Y = []
+	for x in X:
+		Y.append(getmuPause(x))
+	plt.plot(X/30, Y)
+	plt.xlabel("Temps en secondes")
+	plt.ylabel("Temps de pause moyen")
+	if save != "":
+		plt.savefig(save)
+
+	plt.show()
 
 def progress_bar(iteration, total, barLength=50):
     percent = int(round((iteration / total) * 100))
@@ -113,8 +187,10 @@ def generatePixel(mu, sigma, L, LEFT = False):
 	return ((x,y), L)
 
 
-def fromFolder(FOLDER, TEMP, N = 1000, EPOCHS = 50, transitionWidth = 100, name="test", wayAndReturn = True, length=300):
+def fromFolder(FOLDER, TEMP, N = 1000, EPOCHS = 150, transitionWidth = 100, name="test", wayAndReturn = True, length=300, seed=0):
 
+	np.random.seed(seed)
+	
 	sigma = 0
 
 	files = []
@@ -143,7 +219,9 @@ def fromFolder(FOLDER, TEMP, N = 1000, EPOCHS = 50, transitionWidth = 100, name=
 		im1.save(TEMP + '/' +str(n) + ".png")
 		#saveAsPolygon(im1, TEMP + '/' +str(n), length)
 
+		#EPOCHS = int(getEpochs(n))
 		for k in range(0, EPOCHS):
+			sigma = getSigma(n)
 			for p in range(s*k, s*(k+1)):
 				if LEFT :
 					(elem, L) = generatePixel((k*len(L))//(EPOCHS), sigma, L, LEFT = True)
@@ -154,6 +232,12 @@ def fromFolder(FOLDER, TEMP, N = 1000, EPOCHS = 50, transitionWidth = 100, name=
 			im1.save(TEMP + '/' +str(n+1) + ".png")
 			#saveAsPolygon(im1, TEMP + '/' + str(n+1), length)
 			n += 1
+		pause = getPpause(n)
+		while pause > 0:
+			im1.save(TEMP + '/' +str(n+1) + ".png")
+			n += 1
+			pause -= 1
+
 		if i % 2 == 0 and wayAndReturn:
 			LEFT = True
 		else:
