@@ -10,7 +10,7 @@ import time
 N = 24
 
 
-def main(mypath, name, length=300):
+def main(mypath, name, length=300, VideoOUT="OUT/"):
 	files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
 	OUT = name+"_out/"
@@ -19,8 +19,8 @@ def main(mypath, name, length=300):
 	if not os.path.exists(OUT):
 		os.makedirs(OUT)
 
-	if not os.path.exists("OUT"):
-		os.makedirs("OUT")
+	if not os.path.exists(VideoOUT):
+		os.makedirs(VideoOUT)
 
 	if not os.path.exists(SUB):
 		os.makedirs(SUB)
@@ -50,7 +50,7 @@ def main(mypath, name, length=300):
 	k = 0
 	for folder in folders:
 		print(folder)
-		horizontalTransition.fromFolder(SUB + folder, OUT + 'temp',  name = "OUT/"+ str(folder), length=300, seed=k)
+		horizontalTransition.fromFolder(SUB + folder, OUT + 'temp',  name = VideoOUT+ str(folder), length=300, seed=k)
 		k += 1
 
 

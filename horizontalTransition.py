@@ -33,10 +33,10 @@ def plotSigma(save=""):
 
 
 def getEpochs(x):
-	if x < 2*405:
-		return 2*180
+	if x < 405:
+		return 180
 	else:
-		return 2*np.sin(0.0028*x + 802.35)*35 + 8 + 195
+		return np.sin(0.0028*x + 802.35)*35 + 8 + 195
 
 def plotEpochs(save=""):
 	X = np.arange(5820)
@@ -61,14 +61,14 @@ def getmuPause(x):
 		return np.sin(0.005*x + 801.8)*15  + 120
 
 def getPpause(x):
-	if x < 2*500:
+	if x < 500:
 		mu = getmuPause(x)
 		sigma = mu*0.1
 		return 2*int(np.random.normal(mu, sigma, 1)[0])
-	elif x >= 2*500 :
+	elif x >= 500 :
 		mu = getmuPause(x)
 		sigma = mu*0.35
-		return 2*int(np.random.normal(mu, sigma, 1)[0])
+		return int(np.random.normal(mu, sigma, 1)[0])
 
 def plotPause(save=""):
 	X = np.arange(5820)

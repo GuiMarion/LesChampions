@@ -4,6 +4,11 @@ from PIL import ImageDraw
 import os
 from tqdm import tqdm
 from math import *
+import glob
+import shutil
+import pygame
+from pygame.locals import*
+
 
 def getPolygon(A_angle, C_angle, size):
 
@@ -133,10 +138,10 @@ class img:
 		'''
 
 		images = []
-		for i in tqdm(range(4, len(self.matrix) // n - 1)):
-			for j in range(4, len(self.matrix[0]) // n - 1):
-				for k1 in range(0, 255, 255//addData):
-					for k2 in range(0, 255, 255//addData):
+		for i in tqdm(range(0, len(self.matrix) // n - 1)):
+			for j in range(0, len(self.matrix[0]) // n - 1):
+				for k1 in range(0, n, n//addData):
+					for k2 in range(0, n, n//addData):
 						im = img(self.matrix[i*n + k1 : (i+1)*n + k1, j*n + k2 : (j+1)*n + k2], matrix = True)
 						#if im.getStandardDeviation() < 530:
 						images.append(im)
@@ -209,7 +214,58 @@ def discretizeSpace(n):
 	return points
 
 
+def filterDataBase(database):
+	databaseout = []
+	pygame.init()
+	ecran = pygame.display.set_mode((700, 700))
+	continuer = True
+	print("You will process", len(database), "images.")
 
-def run(n=256, DATA="Data/", OUT="OUT/", spaceSize=5, addData=1):
+	k = 0
+
+	while continuer:
+
+		try :
+			database[k].save(".tmp", polygon=False)
+			image = pygame.image.load(".tmp.png").convert_alpha()
+		except pygame.error:
+			print("Error with", database[k])
+			k += 1
+
+		ecran.fill((0,0,0))
+		ecran.blit(image, (50, 50))                       
+		pygame.display.flip()
+
+		for event in pygame.event.get():
+			if event.type == pygame.KEYDOWN:
+				if event.key == K_ESCAPE:
+					continuer = False
+				elif event.key == K_UP or event.key == K_RIGHT:
+					databaseout.append(database[k])
+					k += 1
+				elif event.key == K_DOWN:
+					k += 1
+
+		if k >= len(database):
+			continuer = False
+
+
+	pygame.quit()
+
+	return databaseout
+
+
+def run(n=256, DATA="Data/", OUT="OUT/", spaceSize=5, addData=1, filter=True):
+
+	for filename in glob.glob('Images_out/images'):
+		try:
+		    shutil.rmtree(filename)
+		except OSError as e:
+		    pass	
+	    
 	data = constructDataBase(DATA, n, addData = addData)
+
+	data = filterDataBase(data)
+	print("You selected", len(data), "images.")
+
 	sortImages(data, OUT, spaceSize)
