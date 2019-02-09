@@ -11,13 +11,15 @@ import matplotlib.pyplot as plt
 
 def getSigma(x):
 	#return np.sin(0.005*x + 300)*8 + 8
-	if x > 4150:
-		return np.sin(0.003*x + 294)*8 + 8
+	if x > 4150 and x <= 6540:
+		return np.sin(0.001*x + 950)*20 + 16
+	elif x > 6540:
+		return 36
 	else: 
 		return 0
 
 def plotSigma(save=""):
-	X = np.arange(5820)
+	X = np.arange(6820)
 	Y = []
 	for i in range(len(X)):
 		Y.append(getSigma(i))
